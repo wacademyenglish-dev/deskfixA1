@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFLIX Masterclass: The Office</title>
+    <!-- Fontes -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@300;400;500;600;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        corp: {
+                            blue: '#2563eb',      /* Azul vibrante corporativo */
+                            blueDark: '#1e3a8a',
+                            bg: '#020617',        /* Fundo principal super escuro */
+                            panel: 'rgba(30, 41, 59, 0.5)', /* Slate 800 com opacidade para o vidro */
+                            postit: '#fef08a',    /* Amarelo dos post-its */
+                            red: '#ef4444'
+                        }
+                    },
+                    fontFamily: {
+                        base: ['Inter', 'sans-serif'],
+                        hand: ['Caveat', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ==================================================================
+           WOLFLIX ENGINE 3.0 - PREMIUM CINEMATIC UI
+           ================================================================== */
+        
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            /* Gradiente radial premium para dar profundidade ao ecrã */
+            background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2) 0%, #020617 60%);
+        }
+
+        /* --- Sistema de Paginação (Fim absoluto dos cortes) --- */
+        .slide {
+            display: none; 
+            opacity: 0; 
+            width: 100%; 
+            min-height: 100%; /* Permite o crescimento natural */
+            flex-direction: column; 
+        }
+        .slide.active { 
+            display: flex; 
+            animation: cinematicFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+        .page-content {
+            margin: auto; /* Centra perfeitamente na vertical quando pequeno; encosta ao topo quando faz scroll */
+            width: 100%; 
+            max-width: 950px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            text-align: center; 
+            flex-shrink: 0;
+            padding: 2rem 0;
+        }
+
+        @keyframes cinematicFade {
+            from { opacity: 0; transform: scale(0.98); filter: blur(2px); }
+            to { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        /* --- Glassmorphism (Efeito Vidro Fosco) --- */
+        .glass-panel {
+            background-color: var(--tw-colors-corp-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Reflexo subtil no topo */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1.25rem;
+            transition: all 0.4s ease;
+        }
+        
+        .interactive-card { cursor: pointer; }
+        .interactive-card:hover { 
+            transform: translateY(-4px); 
+            border-color: rgba(59, 130, 246, 0.5); 
+            background-color: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.2); 
+        }
+        
+        /* Sistema de Revelação Limpo */
+        .reveal-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .interactive-card.open .reveal-content, .glass-panel.open .reveal-content { 
+            max-height: 500px; 
+            opacity: 1; 
+            margin-top: 1.5rem; 
+            padding-top: 1.5rem; 
+            border-top: 1px dashed rgba(255,255,255,0.15); 
+        }
+
+        /* --- UI Específica do The Office --- */
+        .post-it {
+            background-color: #fef08a;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            font-family: 'Caveat', cursive;
+            border-bottom-right-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #451a03;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .post-it:hover { transform: scale(1.05) rotate(-3deg) translateY(-5px); z-index: 20; box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+        .post-it::after {
+            content: ""; position: absolute; bottom: 0; right: 0;
+            border-width: 15px 15px 0 0; border-style: solid;
+            border-color: #fde047 transparent transparent transparent;
+        }
+
+        .id-badge {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-top: 16px solid #2563eb;
+            border-radius: 0.75rem; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            position: relative; 
+            padding-top: 1.5rem; 
+            color: #f8fafc;
+        }
+        .id-badge::before {
+            content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            width: 50px; height: 12px; border: 2px solid rgba(255,255,255,0.2); 
+            border-radius: 10px; background: #0f172a; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Botões Premium */
+        .premium-btn {
+            background: linear-gradient(to bottom, #3b82f6, #2563eb);
+            color: white; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+            border-radius: 0.75rem; transition: all 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+            border: 1px solid #60a5fa;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        .premium-btn:hover { background: linear-gradient(to bottom, #60a5fa, #3b82f6); transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.6); }
+        .premium-btn:active { transform: translateY(1px); box-shadow: 0 5px 10px -5px rgba(37, 99, 235, 0.4); }
+
+        .btn-outline { background-color: transparent; border: 1px solid rgba(255,255,255,0.2); color: #94a3b8; transition: all 0.2s; }
+        .btn-outline:hover { border-color: #3b82f6; color: #fff; background-color: rgba(59,130,246,0.1); }
+
+        /* --- Área do Minijogo Hot & Cold --- */
+        #radar-area {
+            width: 100%; max-width: 600px; height: 400px;
+            background-color: #0f172a; 
+            border: 2px solid rgba(59,130,246,0.3);
+            border-radius: 1rem; position: relative; cursor: crosshair;
+            overflow: hidden; margin: 0 auto;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+        #radar-feedback {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 3rem; font-weight: 900; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s; text-transform: uppercase;
+        }
+        #target-desk {
+            position: absolute; width: 60px; height: 60px; font-size: 3.5rem;
+            display: none; pointer-events: none; transform: translate(-50%, -50%);
+            z-index: 20; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+        }
+        .pulse-anim { animation: pulseBg 0.8s forwards; }
+        @keyframes pulseBg {
+            0% { background-color: rgba(239, 68, 68, 0.3); }
+            100% { background-color: #0f172a; }
+        }
+
+        /* --- Sistema de Elogios (Praise) --- */
+        @keyframes toastUp {
+            0% { transform: translate(-50%, 20px); opacity: 0; }
+            10% { transform: translate(-50%, 0); opacity: 1; }
+            90% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -20px); opacity: 0; }
+        }
+        .toast-anim { animation: toastUp 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* --- Scrollbar Customizada --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+    </style>
+</head>
+<!-- HOLY GRAIL LAYOUT: O body controla o tamanho total, header e footer são fixos na estrutura flex, e o main faz scroll internamente -->
+<body class="flex flex-col h-screen w-screen overflow-hidden selection:bg-blue-500 selection:text-white">
+
+    <!-- TOAST DE ELOGIO (Sistema Premium) -->
+    <div id="praise-popup" class="fixed top-[15%] left-1/2 hidden z-[10000] pointer-events-none transform -translate-x-1/2">
+        <div class="glass-panel px-8 py-4 border-l-4 border-l-corp-blue flex items-center gap-4 rounded-full shadow-[0_10px_40px_rgba(37,99,235,0.3)]">
+            <span id="praise-icon" class="text-3xl">🏆</span>
+            <span id="praise-text" class="text-white font-black text-xl md:text-2xl uppercase tracking-widest"></span>
+        </div>
+    </div>
+
+    <!-- CABEÇALHO (Fixo) -->
+    <header class="h-16 shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 z-40 flex items-center justify-between px-4 md:px-8 shadow-md relative">
+        <div class="flex items-center gap-3 md:gap-4">
+            <span class="text-2xl drop-shadow-md">🏢</span>
+            <h1 class="font-base font-black tracking-widest text-lg text-white uppercase hidden md:block">Teacher's Guide</h1>
+            <span class="bg-blue-900/40 text-blue-400 border border-blue-500/30 font-bold text-[10px] md:text-xs px-3 py-1 rounded-full tracking-widest uppercase">LEVEL: A1</span>
+        </div>
+        <div class="flex items-center gap-3 md:gap-5">
+            <!-- Botões de Elogio (Discretos no Topo) -->
+            <div class="flex items-center gap-2 bg-black/30 border border-white/5 rounded-full px-3 py-1 shadow-inner">
+                <span class="hidden lg:inline text-[10px] text-slate-500 font-bold mr-1 uppercase tracking-widest">Praise:</span>
+                <button onclick="triggerPraise('EXCELLENT!', '🏆')" class="text-lg hover:scale-125 transition-transform drop-shadow-md" title="Excellent">🏆</button>
+                <button onclick="triggerPraise('RED HOT!', '🔥')" class="text-lg hover:scale-125 transition-transform drop-shadow-md" title="Red Hot">🔥</button>
+                <button onclick="triggerPraise('GOOD JOB!', '📎')" class="text-lg hover:scale-125 transition-transform drop-shadow-md" title="Good Job">📎</button>
+            </div>
+
+            <button onclick="toggleFullscreen()" class="text-[10px] md:text-xs font-bold text-slate-400 hover:text-white transition-colors hidden sm:block uppercase tracking-widest">
+                [ Fullscreen ]
+            </button>
+            <button onclick="toggleNotepad()" class="text-[10px] md:text-xs font-bold premium-btn px-5 py-2 uppercase tracking-widest">
+                Notes
+            </button>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL (Faz Scroll Independente - Nunca corta) -->
+    <main class="flex-1 overflow-y-auto w-full relative z-10 scroll-smooth">
+        <!-- O container interno agrupa as páginas -->
+        <div class="w-full h-full relative" id="slides-container">
+            
+            <!-- ============================================== -->
+            <!-- ACT I: WELCOME TO DUNDER MIFFLIN               -->
+            <!-- ============================================== -->
+
+            <!-- PÁGINA 1: CAPA -->
+            <section class="slide active p-4 md:p-8">
+                <div class="page-content">
+                    <div class="w-full max-w-[240px] md:max-w-[320px] bg-slate-800 p-2 mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 transform rotate-1 rounded-2xl mx-auto flex justify-center">
+                        <img src="https://i.ytimg.com/vi/V4GJby5y6sM/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLDRPqZnR-qB6dvD0QcjbeKglba27A" alt="The Office Desk Prank" class="w-full h-auto max-h-[40vh] object-contain rounded-xl grayscale-[15%]">
+                    </div>
+                    <span class="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-blue-400 mb-4 bg-blue-900/30 border border-blue-500/30 px-4 py-1.5 rounded-full backdrop-blur-sm">WOLFLIX Masterclass</span>
+                    <h1 class="text-5xl md:text-8xl font-black uppercase tracking-tighter mb-4 text-white drop-shadow-2xl">The Office</h1>
+                    <h2 class="text-xl md:text-3xl font-bold text-blue-400 mb-10 uppercase tracking-widest">The Desk Prank</h2>
+                    
+                    <div class="glass-panel p-8 max-w-3xl border-l-4 border-l-corp-blue">
+                        <p class="text-xl md:text-2xl font-light text-slate-300 italic leading-relaxed">"Where is my desk? Who moved my desk?"</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 2: DIRETIVA DE BOAS-VINDAS -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Directive 01</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Welcome, Teacher</h1>
+                    
+                    <div class="glass-panel p-10 max-w-4xl w-full text-lg leading-relaxed text-slate-300 text-left">
+                        <p class="mb-6 font-bold text-2xl border-b border-white/10 pb-4 text-white">This is an A1 (Beginner) class.</p>
+                        <p class="mb-8">We will use a classic workplace comedy scene to teach very basic, practical English. Keep sentences short and use lots of gestures.</p>
+                        
+                        <div class="bg-black/30 p-8 rounded-xl border border-white/5 shadow-inner">
+                            <h3 class="font-bold uppercase text-sm mb-5 text-blue-400 tracking-widest">Grammar Targets:</h3>
+                            <ul class="list-none space-y-4 font-medium text-xl">
+                                <li class="flex items-center gap-4"><span class="text-blue-500 text-2xl">❓</span> <strong>Question Word "Where":</strong> Asking for locations (Where is my desk?).</li>
+                                <li class="flex items-center gap-4"><span class="text-blue-500 text-2xl">📦</span> <strong>Prepositions of Place:</strong> In, On, Under, Next to.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 3: AQUECIMENTO 1 (PRANKS) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Warm-Up Phase</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Pranks & Jokes</h1>
+                    
+                    <div class="glass-panel p-12 max-w-3xl w-full text-center hover:bg-slate-800/60 transition-colors cursor-default">
+                        <span class="text-7xl mb-8 block drop-shadow-xl">🤡</span>
+                        <p class="text-3xl font-bold mb-8 text-white leading-relaxed">
+                            "Do you like pranks (jokes)? Are you a serious person or a funny person?"
+                        </p>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest border-t border-white/10 pt-6 mt-4">Help the student formulate: "I am a funny person."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 4: AQUECIMENTO 2 (O ESCRITÓRIO) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Warm-Up Phase</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Your Workspace</h1>
+                    
+                    <div class="glass-panel p-12 max-w-3xl w-full text-center hover:bg-slate-800/60 transition-colors cursor-default">
+                        <span class="text-7xl mb-8 block drop-shadow-xl">💻</span>
+                        <p class="text-3xl font-bold mb-8 text-white leading-relaxed">
+                            "Do you work in an office or at home? Is your desk clean or messy?"
+                        </p>
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest border-t border-white/10 pt-6 mt-4">Help the student formulate: "My desk is very clean."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 5: CRACHÁS DOS PERSONAGENS -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Character Dossiers</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-12 text-white">The Employees</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-5xl">
+                        <!-- Jim -->
+                        <div class="id-badge p-8 flex flex-col items-center text-center">
+                            <div class="w-32 h-32 bg-slate-800 rounded-full mb-6 overflow-hidden border-4 border-slate-600 shadow-inner">
+                                <img src="https://upload.wikimedia.org/wikipedia/en/7/7e/Jim-halpert.jpg" alt="Jim" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-3xl font-black text-white mb-2">Jim Halpert</h3>
+                            <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-6 border-b border-white/10 w-full pb-4">Salesman</p>
+                            <p class="text-lg text-slate-300 font-light leading-relaxed">He is the <strong>Prankster</strong>. He likes to play jokes. He is calm and funny.</p>
+                        </div>
+                        <!-- Dwight -->
+                        <div class="id-badge p-8 flex flex-col items-center text-center">
+                            <div class="w-32 h-32 bg-slate-800 rounded-full mb-6 overflow-hidden border-4 border-slate-600 shadow-inner">
+                                <img src="https://upload.wikimedia.org/wikipedia/en/c/cd/Dwight_Schrute.jpg" alt="Dwight" class="w-full h-full object-cover">
+                            </div>
+                            <h3 class="text-3xl font-black text-white mb-2">Dwight Schrute</h3>
+                            <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-6 border-b border-white/10 w-full pb-4">Salesman</p>
+                            <p class="text-lg text-slate-300 font-light leading-relaxed">He is the <strong>Serious Guy</strong>. He loves rules. He gets angry easily.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 6: INVENTÁRIO DO ESCRITÓRIO 1 -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Vocabulary Module</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-white">Office Inventory I</h1>
+                    <p class="text-xl mb-10 text-slate-400 font-medium">Click the sticky notes to learn the vocabulary.</p>
+                    
+                    <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>🪑</span>Chair'">?</div>
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>💻</span>Computer'">?</div>
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>🗄️</span>Desk'">?</div>
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>☎️</span>Phone'">?</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 7: INVENTÁRIO DO ESCRITÓRIO 2 -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Vocabulary Module</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Office Inventory II</h1>
+                    
+                    <div class="grid grid-cols-2 gap-8 w-full max-w-4xl">
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>🖊️</span>Pen'">?</div>
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>📄</span>Paper'">?</div>
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>☕</span>Mug'">?</div>
+                        <div class="post-it p-8 text-center text-3xl md:text-4xl font-bold flex flex-col items-center justify-center min-h-[160px]" onclick="this.innerHTML='<span class=\'text-6xl block mb-4 font-base drop-shadow-md\'>🚽</span>Bathroom'">?</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- ACT II: WHERE IS IT? (Grammar)                 -->
+            <!-- ============================================== -->
+
+            <!-- PÁGINA 8: GRAMÁTICA 1 (WHERE) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Grammar Focus</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-white">The Magic Word</h1>
+                    
+                    <p class="text-2xl mb-10 text-slate-300 font-light">How do we find lost things? We ask <strong class="text-blue-400 font-black">WHERE</strong>.</p>
+
+                    <div class="glass-panel p-10 w-full max-w-4xl text-left border-l-8 border-l-corp-blue">
+                        <div class="mb-10">
+                            <p class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">Singular (One thing)</p>
+                            <p class="text-4xl font-black text-white">"Where <span class="text-blue-400 border-b-4 border-blue-400">is</span> my desk?"</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-3">Plural (Two or more things)</p>
+                            <p class="text-4xl font-black text-white">"Where <span class="text-blue-400 border-b-4 border-blue-400">are</span> my pens?"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 9: GRAMÁTICA 2 (PREPOSIÇÕES) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Grammar Focus</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-white">Prepositions of Place</h1>
+                    
+                    <p class="text-2xl mb-10 text-slate-300 font-light">How do we answer "Where"?</p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-5xl text-center">
+                        <div class="glass-panel p-8">
+                            <span class="text-6xl block mb-6 drop-shadow-lg">📥</span>
+                            <p class="font-black text-2xl text-blue-400 uppercase">IN</p>
+                        </div>
+                        <div class="glass-panel p-8">
+                            <span class="text-6xl block mb-6 drop-shadow-lg">📤</span>
+                            <p class="font-black text-2xl text-blue-400 uppercase">ON</p>
+                        </div>
+                        <div class="glass-panel p-8">
+                            <span class="text-6xl block mb-6 drop-shadow-lg">🪑🐈</span>
+                            <p class="font-black text-2xl text-blue-400 uppercase">UNDER</p>
+                        </div>
+                        <div class="glass-panel p-8">
+                            <span class="text-6xl block mb-6 drop-shadow-lg">🧍‍♂️🧍‍♀️</span>
+                            <p class="font-black text-2xl text-blue-400 uppercase">NEXT TO</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 10: MINIJOGO (HIDE AND SEEK) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Interactive Challenge</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-white">Hide and Seek</h1>
+                    
+                    <p class="text-xl mb-10 text-slate-400 font-medium">Complete the sentence with the correct preposition. Click to reveal.</p>
+
+                    <div class="space-y-6 text-2xl w-full max-w-4xl">
+                        <div class="glass-panel p-8 interactive-card border-l-4 border-blue-500 flex flex-col md:flex-row items-center justify-between text-center" onclick="this.classList.toggle('open')">
+                            <div class="flex items-center justify-center gap-6 w-full">
+                                <span class="text-6xl drop-shadow-md">🍮📎</span>
+                                <p class="font-light text-white">1. The stapler is <span class="border-b-2 border-slate-500 px-8 mx-2 text-transparent">___</span> the jelly.</p>
+                            </div>
+                            <div class="reveal-content mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-white/10 md:pl-8 text-blue-400 font-black text-3xl w-full md:w-auto">
+                                > IN
+                            </div>
+                        </div>
+                        
+                        <div class="glass-panel p-8 interactive-card border-l-4 border-blue-500 flex flex-col md:flex-row items-center justify-between text-center" onclick="this.classList.toggle('open')">
+                            <div class="flex items-center justify-center gap-6 w-full">
+                                <span class="text-6xl drop-shadow-md">🗄️☕</span>
+                                <p class="font-light text-white">2. The mug is <span class="border-b-2 border-slate-500 px-8 mx-2 text-transparent">___</span> the desk.</p>
+                            </div>
+                            <div class="reveal-content mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-white/10 md:pl-8 text-blue-400 font-black text-3xl w-full md:w-auto">
+                                > ON
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- ACT III: A SALA DE EXIBIÇÃO                    -->
+            <!-- ============================================== -->
+
+            <!-- PÁGINA 11: PREPARAÇÃO PARA O VÍDEO -->
+            <section class="slide p-4 md:p-8 text-center">
+                <div class="page-content">
+                    <div class="w-32 h-32 rounded-full bg-blue-900/30 flex items-center justify-center mb-8 border border-blue-500/30 shadow-[0_0_40px_rgba(37,99,235,0.2)]">
+                        <span class="text-6xl drop-shadow-md">📺</span>
+                    </div>
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Video Evidence</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Screening Prep</h1>
+                    <div class="glass-panel p-10 max-w-3xl text-xl leading-relaxed text-slate-300">
+                        <p class="mb-4">We are going to watch a very funny and awkward scene.</p>
+                        <p class="mb-8">Dwight cannot find his desk. It is missing.</p>
+                        <p class="font-bold text-blue-300 uppercase tracking-widest text-sm bg-blue-900/40 p-4 rounded-xl border border-blue-500/30 shadow-inner">
+                            Student Focus: Look at Dwight's face. Look at Jim's face.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 12: O VÍDEO -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content h-full w-full max-w-5xl">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400 text-center">Corporate Feed</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 text-white text-center">The Tape</h1>
+                    
+                    <div class="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] relative border border-white/10 bg-black">
+                        <!-- Link atualizado do The Office que foi pedido -->
+                        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/V4GJby5y6sM?start=0&end=100&rel=0" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 13: TESTE DE COMPREENSÃO -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Data Analysis</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">True or False?</h1>
+                    
+                    <p class="text-xl mb-10 text-slate-400 font-light">Ask simple A1 questions about the video.</p>
+
+                    <div class="space-y-6 w-full max-w-4xl">
+                        <div class="glass-panel p-8 interactive-card text-left" onclick="this.classList.toggle('open')">
+                            <p class="font-bold text-2xl text-white">1. Jim is very angry.</p>
+                            <div class="reveal-content text-red-400 font-bold text-xl mt-4">
+                                > FALSE. (Jim is calm and happy).
+                            </div>
+                        </div>
+                        <div class="glass-panel p-8 interactive-card text-left" onclick="this.classList.toggle('open')">
+                            <p class="font-bold text-2xl text-white">2. The desk is in the bathroom.</p>
+                            <div class="reveal-content text-green-400 font-bold text-xl mt-4">
+                                > TRUE. (Yes, it is in the bathroom).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 14: EMOÇÕES VISUAIS -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Visual Check</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Emotions</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+                        <div class="glass-panel p-10 text-center border-t-4 border-t-red-500">
+                            <span class="text-7xl mb-6 block drop-shadow-md">😡</span>
+                            <h3 class="text-3xl font-black text-white mb-6">Dwight</h3>
+                            <p class="text-xl font-medium text-red-400 bg-red-900/20 py-2 rounded-lg">He is ANGRY and STRESSED.</p>
+                        </div>
+                        <div class="glass-panel p-10 text-center border-t-4 border-t-green-500">
+                            <span class="text-7xl mb-6 block drop-shadow-md">😏</span>
+                            <h3 class="text-3xl font-black text-white mb-6">Jim</h3>
+                            <p class="text-xl font-medium text-green-400 bg-green-900/20 py-2 rounded-lg">He is CALM and FUNNY.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- ACT IV: QUENTE E FRIO (Mecânica WOW)           -->
+            <!-- ============================================== -->
+
+            <!-- PÁGINA 15: EXPLICAÇÃO CULTURAL -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Culture</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">The Game</h1>
+                    
+                    <div class="glass-panel p-12 max-w-4xl w-full text-center">
+                        <p class="text-2xl font-light text-slate-300 mb-10 leading-relaxed">Jim plays a children's game called "Hot and Cold" to help Dwight find the desk.</p>
+                        
+                        <div class="flex flex-col gap-6 text-left w-max mx-auto bg-black/40 p-8 rounded-2xl border border-white/5 shadow-inner">
+                            <p class="text-3xl font-black text-white flex items-center gap-4"><span class="text-blue-400 text-4xl">❄️ Cold</span> <span class="text-slate-500 font-light text-xl">= Far away.</span></p>
+                            <p class="text-3xl font-black text-white flex items-center gap-4"><span class="text-orange-400 text-4xl">🔥 Warmer</span> <span class="text-slate-500 font-light text-xl">= Getting closer.</span></p>
+                            <p class="text-3xl font-black text-white flex items-center gap-4"><span class="text-red-500 text-4xl">🚨 Hot</span> <span class="text-slate-500 font-light text-xl">= You found it!</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 16: A MECÂNICA WOW (RADAR) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content w-full">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Interactive Radar</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6 text-white">Find the Phone</h1>
+                    
+                    <p class="text-xl mb-8 text-slate-400 font-light">Help Dwight find his phone. Click around the grid to search.</p>
+
+                    <!-- Área de Jogo Radar (Design Premium) -->
+                    <div id="radar-area" onclick="checkRadar(event)">
+                        <div id="radar-feedback" class="text-slate-500 tracking-widest">CLICK TO SEARCH</div>
+                        <div id="target-desk">📱</div>
+                    </div>
+                    
+                    <div class="mt-8 flex gap-4 justify-center">
+                        <button onclick="resetRadar()" class="text-xs font-bold text-slate-500 hover:text-blue-400 uppercase tracking-widest underline transition-colors">Reset Game</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 17: ANÁLISE DE SCRIPT 1 -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Audio Logs</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">The Complaint</h1>
+                    
+                    <div class="glass-panel p-12 text-left border-l-4 border-red-500 max-w-4xl w-full shadow-2xl">
+                        <p class="text-4xl font-black text-white italic mb-8 drop-shadow-md">"That is weird. This is not funny."</p>
+                        
+                        <div class="bg-black/30 p-6 rounded-xl mb-8 border border-white/5">
+                            <p class="text-xl text-slate-300 font-light mb-2"><strong class="text-white">Weird:</strong> Strange or not normal.</p>
+                            <p class="text-xl text-slate-300 font-light"><strong class="text-white">Funny:</strong> Making you laugh.</p>
+                        </div>
+                        
+                        <div class="border-t border-white/10 pt-6">
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Notice the Demonstratives:</p>
+                            <p class="text-2xl font-bold text-blue-400">THAT (Far) vs. THIS (Near).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 18: ANÁLISE DE SCRIPT 2 -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Audio Logs</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">The Command</h1>
+                    
+                    <div class="glass-panel p-12 text-left border-l-4 border-green-500 max-w-4xl w-full shadow-2xl">
+                        <p class="text-5xl font-black text-white italic mb-8 drop-shadow-md">"Calm down."</p>
+                        
+                        <p class="text-2xl text-slate-300 font-light leading-relaxed mb-10">
+                            A very common command to tell someone to relax when they are angry or stressed.
+                        </p>
+                        
+                        <div class="bg-green-900/20 border border-green-500/30 p-6 rounded-xl text-center shadow-inner">
+                            <p class="text-xs font-bold text-green-400 uppercase tracking-widest mb-3">🗣️ Speaking Prompt:</p>
+                            <p class="text-xl text-white font-medium">"When you are angry, does it help when someone says 'calm down'?"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 19: ANÁLISE DE SCRIPT 3 -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Audio Logs</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Kevin's Rule</h1>
+                    
+                    <div class="glass-panel p-12 text-center border-t-4 border-blue-500 max-w-4xl w-full shadow-2xl">
+                        <p class="text-5xl font-black text-white italic mb-8 drop-shadow-md">"Wash your hands, Kevin."</p>
+                        
+                        <p class="text-2xl text-slate-300 font-light leading-relaxed">
+                            A simple, hilarious hygiene command because Kevin was in the bathroom.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- ACT V: ROLEPLAY & CONCLUSÃO                    -->
+            <!-- ============================================== -->
+
+            <!-- PÁGINA 20: PREPARAÇÃO DO ROLEPLAY -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Action</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Acting Directions</h1>
+                    
+                    <div class="glass-panel p-16 max-w-4xl w-full text-center">
+                        <span class="text-7xl mb-8 block drop-shadow-lg">🎬</span>
+                        <p class="text-3xl font-bold leading-relaxed mb-8 text-white">
+                            "Tell the student: You are Dwight. You must sound very angry and professional!"
+                        </p>
+                        <p class="text-xl text-slate-400 font-light">Let's practice the dialogue on the next page.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 21: ROLEPLAY (A DISCUSSÃO) -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Interactive Speaking</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">The Argument</h1>
+                    
+                    <div class="flex flex-col md:flex-row gap-8 w-full max-w-6xl min-h-[45vh]">
+                        <!-- Teacher (Jim) -->
+                        <div class="flex-1 glass-panel p-10 flex flex-col justify-center text-center border-t-4 border-t-blue-400 hover:bg-slate-800/80 transition-colors">
+                            <h3 class="text-3xl font-black mb-3 uppercase text-blue-400 drop-shadow-sm">Teacher</h3>
+                            <p class="text-xs font-bold text-slate-500 mb-10 uppercase tracking-widest">Plays: Jim (Calm)</p>
+                            <p class="text-2xl font-light text-slate-200 italic mb-6">"I didn't lose your desk. Calm down."</p>
+                            <p class="text-2xl font-light text-slate-200 italic">"You should retrace your steps."</p>
+                        </div>
+                        
+                        <!-- Student (Dwight) -->
+                        <div class="flex-1 glass-panel p-10 flex flex-col justify-center text-center border-t-4 border-t-red-500 hover:bg-slate-800/80 transition-colors">
+                            <h3 class="text-3xl font-black mb-3 uppercase text-red-500 drop-shadow-sm">Student</h3>
+                            <p class="text-xs font-bold text-slate-500 mb-10 uppercase tracking-widest">Plays: Dwight (Angry)</p>
+                            <p class="text-2xl font-bold text-white italic mb-6">"Where is my desk?"</p>
+                            <p class="text-2xl font-bold text-white italic mb-6">"This is totally unprofessional!"</p>
+                            <p class="text-2xl font-bold text-white italic">"I am going to tell Michael!"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 22: DISCUSSÃO SOBRE O TRABALHO -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Discussion</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Watercooler Talk</h1>
+                    
+                    <div class="glass-panel p-12 max-w-4xl w-full text-center">
+                        <span class="text-7xl mb-8 block drop-shadow-lg opacity-80">🚰</span>
+                        <p class="text-3xl text-white font-light mb-10 leading-relaxed">
+                            "Is it okay to play jokes at work with your friends? Or is it 'unprofessional' like Dwight says?"
+                        </p>
+                        <p class="text-sm text-slate-400 font-bold uppercase tracking-widest border-t border-white/10 pt-6">Ask the student for their opinion.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 23: VERIFICAÇÃO DE MEMÓRIA -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Application</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Memory Check</h1>
+                    
+                    <div class="glass-panel p-12 max-w-4xl w-full text-center border-l-4 border-blue-500">
+                        <p class="text-4xl font-black text-blue-400 mb-8 drop-shadow-md">"Don't look!"</p>
+                        <p class="text-3xl text-white font-light leading-relaxed mb-8">
+                            "Tell me 3 things that are <strong class="text-blue-400 font-black border-b-2 border-blue-400">ON</strong> your desk right now."
+                        </p>
+                        <p class="text-sm text-slate-400 font-bold uppercase tracking-widest mt-6">Practicing prepositions and office vocabulary.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 24: TRABALHO DE CASA -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Assignment</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">Homework Directive</h1>
+                    
+                    <!-- Post-it Premium Design -->
+                    <div class="post-it p-12 max-w-2xl w-full mx-auto transform rotate-1 text-left text-amber-950 shadow-2xl">
+                        <h3 class="text-4xl font-bold mb-6 border-b border-amber-700/30 pb-3">To do list:</h3>
+                        <p class="text-2xl mb-8 leading-relaxed font-medium">
+                            Write 5 sentences describing where things are in your bedroom or office.
+                        </p>
+                        <p class="text-2xl mb-6 font-bold text-amber-900">Use IN, ON, UNDER, NEXT TO.</p>
+                        <p class="text-lg italic opacity-80 border-l-2 border-amber-800/50 pl-4">(Ex: The computer is on the desk. The bag is under the bed).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PÁGINA 25: FIM -->
+            <section class="slide p-4 md:p-8">
+                <div class="page-content">
+                    <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-blue-400">Appraisal</h2>
+                    <h1 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-10 text-white">End of Shift</h1>
+                    
+                    <div class="space-y-4 max-w-2xl w-full text-xl font-bold text-left mb-14">
+                        <label class="flex items-center gap-6 p-6 glass-panel rounded-2xl cursor-pointer hover:bg-slate-800/80 transition-colors">
+                            <input type="checkbox" class="w-6 h-6 accent-blue-500">
+                            <span class="text-slate-200">Office vocabulary learned.</span>
+                        </label>
+                        <label class="flex items-center gap-6 p-6 glass-panel rounded-2xl cursor-pointer hover:bg-slate-800/80 transition-colors">
+                            <input type="checkbox" class="w-6 h-6 accent-blue-500">
+                            <span class="text-slate-200">Prepositions of place mapped.</span>
+                        </label>
+                        <label class="flex items-center gap-6 p-6 glass-panel rounded-2xl cursor-pointer hover:bg-slate-800/80 transition-colors">
+                            <input type="checkbox" class="w-6 h-6 accent-blue-500">
+                            <span class="text-slate-200">"Where is" mastered.</span>
+                        </label>
+                    </div>
+
+                    <div class="w-full flex flex-col items-center">
+                        <p class="mb-8 text-sm text-slate-400 font-bold uppercase tracking-widest">Rate this prank:</p>
+                        <div class="flex justify-center gap-4 md:gap-8 mb-10">
+                            <button onclick="rate(1)" class="dundie text-6xl md:text-8xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-lg">🏆</button>
+                            <button onclick="rate(2)" class="dundie text-6xl md:text-8xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-lg">🏆</button>
+                            <button onclick="rate(3)" class="dundie text-6xl md:text-8xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-lg">🏆</button>
+                            <button onclick="rate(4)" class="dundie text-6xl md:text-8xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-lg">🏆</button>
+                            <button onclick="rate(5)" class="dundie text-6xl md:text-8xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-lg">🏆</button>
+                        </div>
+                        <div id="rat-hub" class="hidden font-bold text-xl text-blue-400 uppercase tracking-widest bg-blue-900/20 px-8 py-3 rounded-xl border border-blue-500/30 shadow-inner">> <span id="star-c" class="text-white mx-2 font-black text-4xl"></span> Dundie Awards.</div>
+                        
+                        <button onclick="window.location.reload();" class="mt-14 premium-btn px-10 py-4 text-base">
+                            Clock Out (Restart)
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- RODAPÉ (Paginação Fixa) -->
+    <footer class="h-20 shrink-0 bg-slate-900/80 backdrop-blur-xl border-t border-white/10 z-40 flex items-center justify-between px-6 md:px-10 relative">
+        <div class="flex-1 flex justify-start">
+            <button onclick="prevSlide()" class="btn-outline text-xs md:text-sm px-6 py-2 rounded-full uppercase tracking-widest font-bold" id="btn-prev">
+                << Prev
+            </button>
+        </div>
+        
+        <div class="flex-1 flex flex-col items-center justify-center">
+            <div class="font-base font-black text-xl md:text-2xl tracking-widest text-white drop-shadow-md">
+                PAGE <span id="page-num" class="text-blue-400">01</span> <span class="text-slate-500 text-sm">/ 25</span>
+            </div>
+            <div class="font-base font-bold text-[9px] tracking-widest text-slate-500 mt-1 uppercase hidden md:block">
+                POWERED BY WOLFLIX
+            </div>
+        </div>
+
+        <div class="flex-1 flex justify-end">
+            <button onclick="nextSlide()" class="btn-outline text-xs md:text-sm px-6 py-2 rounded-full uppercase tracking-widest font-bold" id="btn-next">
+                Next >>
+            </button>
+        </div>
+    </footer>
+
+    <!-- BLOCO DE NOTAS (Slide-out) -->
+    <aside id="notepad-panel" class="fixed top-0 right-0 w-full max-w-md h-full bg-[#fefce8] border-l border-white/10 z-50 translate-x-full flex flex-col shadow-[-20px_0px_50px_rgba(0,0,0,0.5)] transition-transform duration-500">
+        <div class="p-6 border-b border-yellow-300 bg-yellow-200/50 flex justify-between items-center shadow-sm">
+            <h2 class="font-hand font-bold text-amber-900 text-3xl flex items-center gap-2">
+                Teacher Notes
+            </h2>
+            <button onclick="toggleNotepad()" class="text-amber-700 hover:text-amber-900 font-black text-2xl px-2 transition-colors">✕</button>
+        </div>
+        <textarea class="flex-1 w-full bg-transparent p-8 font-hand text-amber-900 text-3xl leading-relaxed outline-none resize-none placeholder:text-amber-700/30" placeholder="Write on the post-it..."></textarea>
+    </aside>
+
+    <!-- LÓGICA JAVASCRIPT -->
+    <script>
+        // --- 1. Lógica de Paginação Segura ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function updatePagination() {
+            document.getElementById('page-num').innerText = (currentSlide + 1).toString().padStart(2, '0');
+            document.getElementById('btn-prev').disabled = currentSlide === 0;
+            document.getElementById('btn-next').disabled = currentSlide === totalSlides - 1;
+            
+            // Se sair da página 16, faz reset ao jogo de radar
+            if(currentSlide !== 15) resetRadar();
+
+            // Volta o scroll da área main para o topo suavemente
+            document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToSlide(index) {
+            if(index < 0 || index >= totalSlides) return;
+            slides[currentSlide].classList.remove('active');
+            currentSlide = index;
+            slides[currentSlide].classList.add('active');
+            updatePagination();
+        }
+
+        function nextSlide() { goToSlide(currentSlide + 1); }
+        function prevSlide() { goToSlide(currentSlide - 1); }
+
+        // Expõe funções ao Window para prevenir erros de escopo
+        window.nextSlide = nextSlide;
+        window.prevSlide = prevSlide;
+        window.goToSlide = goToSlide;
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight') nextSlide();
+            if(e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // --- 2. Painéis e Fullscreen ---
+        function toggleFullscreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+            const req = docEl.requestFullscreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+            
+            try {
+                if (!doc.fullscreenElement) {
+                    const promise = req ? req.call(docEl) : null;
+                    if (promise && promise.catch) promise.catch(err => console.warn(err));
+                } else {
+                    const promise = exit ? exit.call(doc) : null;
+                    if (promise && promise.catch) promise.catch(err => console.warn(err));
+                }
+            } catch (err) { console.warn("Fullscreen error", err); }
+        }
+
+        function toggleNotepad() {
+            document.getElementById('notepad-panel').classList.toggle('translate-x-full');
+        }
+
+        // --- 3. Sistema de Elogios Premium (Toast) ---
+        function triggerPraise(mainText, icon) {
+            const popup = document.getElementById('praise-popup');
+            const textContainer = document.getElementById('praise-text');
+            const iconContainer = document.getElementById('praise-icon');
+            
+            textContainer.innerText = mainText;
+            iconContainer.innerText = icon;
+            
+            popup.classList.remove('hidden');
+            
+            // Força reflow para recomeçar animação
+            popup.classList.remove('toast-anim');
+            void popup.offsetWidth;
+            popup.classList.add('toast-anim');
+            
+            setTimeout(() => {
+                popup.classList.add('hidden');
+            }, 2500); // Duração da animação toastUp
+        }
+
+        // --- 4. MECÂNICA WOW (Hot & Cold Radar) ---
+        let targetX = 0;
+        let targetY = 0;
+        let gameActive = false;
+
+        function initRadar() {
+            const area = document.getElementById('radar-area');
+            const rect = area.getBoundingClientRect();
+            // Posição alvo aleatória com margem de segurança
+            targetX = Math.floor(Math.random() * (rect.width - 100)) + 50;
+            targetY = Math.floor(Math.random() * (rect.height - 100)) + 50;
+            gameActive = true;
+        }
+
+        function checkRadar(event) {
+            if(!gameActive) initRadar();
+            
+            const area = document.getElementById('radar-area');
+            const feedback = document.getElementById('radar-feedback');
+            const targetEl = document.getElementById('target-desk');
+            
+            const rect = area.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+            
+            const distance = Math.hypot(clickX - targetX, clickY - targetY);
+            
+            // Pisca o fundo vermelho
+            area.classList.remove('pulse-anim');
+            void area.offsetWidth; 
+            area.classList.add('pulse-anim');
+
+            feedback.style.opacity = '1';
+            feedback.style.transform = 'translate(-50%, -50%) scale(1.2)';
+            setTimeout(() => { feedback.style.transform = 'translate(-50%, -50%) scale(1)'; }, 200);
+
+            if(distance < 60) {
+                feedback.innerHTML = '<span class="text-red-500 drop-shadow-[0_0_15px_red]">RED HOT! FOUND IT!</span>';
+                targetEl.style.left = targetX + 'px';
+                targetEl.style.top = targetY + 'px';
+                targetEl.style.display = 'block';
+                gameActive = false;
+                triggerPraise("RED HOT!", "🔥");
+            } else if (distance < 150) {
+                feedback.innerHTML = '<span class="text-orange-400 drop-shadow-[0_0_10px_orange]">WARMER...</span>';
+            } else if (distance < 250) {
+                feedback.innerHTML = '<span class="text-yellow-400">A LITTLE WARMER...</span>';
+            } else {
+                feedback.innerHTML = '<span class="text-blue-400 drop-shadow-[0_0_10px_blue]">COLD ❄️</span>';
+            }
+        }
+
+        function resetRadar() {
+            gameActive = false;
+            document.getElementById('radar-feedback').innerHTML = 'CLICK TO SEARCH';
+            document.getElementById('target-desk').style.display = 'none';
+        }
+
+        // --- 5. Rating Final (Dundies) ---
+        function rate(n) {
+            const drops = document.querySelectorAll('.dundie');
+            drops.forEach((d, i) => {
+                d.classList.toggle('grayscale', i >= n);
+                d.classList.toggle('opacity-30', i >= n);
+                if(i < n) d.style.filter = "drop-shadow(0 10px 15px rgba(255,215,0,0.4))";
+                else d.style.filter = "none";
+            });
+            document.getElementById('rat-hub').classList.remove('hidden');
+            document.getElementById('star-c').innerText = n;
+        }
+
+        // Inicializar UI
+        updatePagination();
+    </script>
+</body>
+</html>
